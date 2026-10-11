@@ -1,0 +1,52 @@
+name: vinp_ospatialnet_vem_16k_fp32
+task: SE
+model:
+  uid: vinp-ospatialnet-vem-16k-fp32
+  architecture: VINP-oSpatialNet
+  version: avg-epoch24-25-28-vem100
+  task: SE
+  languages: [auto]
+runtime:
+  device: cuda
+  dtype: float32
+  chip: RTX3090
+  batch_size: 1
+io:
+  input_type: audio_path
+  output_type: audio_path
+  schema:
+    input:
+      audio_path:
+        type: string
+        required: true
+      output_path:
+        type: string
+        required: false
+    output:
+      audio_path:
+        type: string
+        required: true
+      rir_path:
+        type: string
+        required: true
+      sample_rate:
+        type: integer
+        required: true
+protocols:
+  strict_core:
+    enabled: true
+    param_map:
+      precision:
+        model_param: dtype
+        mapping:
+          float32: torch.float32
+      max_batch_size:
+        model_param: batch_size
+        mapping:
+          "1": 1
+server:
+  command: [".venv/bin/python", "server.py"]
+  env:
+    MODEL_PATH: checkpoint.pt
+    MODEL_DEVICE: cuda
+  timeout: 600
